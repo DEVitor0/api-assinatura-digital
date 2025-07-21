@@ -9,6 +9,7 @@ const config: Config = {
     }],
   },
   moduleFileExtensions: ['ts', 'js', 'json'],
+  setupFiles: ["<rootDir>/jest.setup.ts"],
   testMatch: ['**/__tests__/**/*.test.ts'],
   clearMocks: true,
 };
