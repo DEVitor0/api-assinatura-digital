@@ -4,6 +4,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import authRoutes from "./pages/api/auth";
+import { globalRateLimiter } from "./middlewares/rateLimiter";
 
 dotenv.config();
 
@@ -13,6 +14,8 @@ app.use(cors());
 app.use(helmet());
 app.use(express.json());
 app.use(morgan("dev"));
+
+app.use(globalRateLimiter); 
 
 app.use("/api/auth", authRoutes);
 

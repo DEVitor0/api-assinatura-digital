@@ -38,9 +38,13 @@ export const loginController = async (req: Request, res: Response) => {
     const valid = await comparePassword(password, user.password);
     if (!valid) return res.status(401).json({ error: "Credenciais inválidas" });
 
-    const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign({
+      userId: user._id,
+      role: user.role,
+      name: user.name,
+      email: user.email
+    }, JWT_SECRET, { expiresIn: "1h" });
+    
 
     return res.status(200).json({ token });
   } catch (err) {
