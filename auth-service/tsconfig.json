@@ -7,8 +7,9 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "outDir": "dist",
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    "types": ["node", "jest"],
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../api-gateway/src/index.ts"],
   "exclude": ["node_modules", "dist", "tests"]
 }
