@@ -19,6 +19,7 @@
     "@babel/preset-typescript": "^7.27.1",
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.1.0",
     "@types/supertest": "^6.0.3",
@@ -38,6 +39,7 @@
     "axios": "^1.10.0",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.4",
     "multer": "^2.0.2",
     "uuid": "^11.1.0"
