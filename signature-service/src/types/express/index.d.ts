@@ -1,14 +1,12 @@
-import { JwtPayload } from "jsonwebtoken";
+import { Types } from "mongoose";
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        id: string;
-        email: string;
-        name: string;
-        role: "admin" | "user" | "signer";
-      };
-    }
+declare module "express-serve-static-core" {
+  interface Request {
+    user?: {
+      id: Types.ObjectId | string;
+      email: string;
+      name: string;
+      role: "admin" | "user" | "signer";
+    };
   }
 }

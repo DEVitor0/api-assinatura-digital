@@ -1,18 +1,32 @@
 import { Request, Response } from "express";
-import { createSignatureSession } from "../services/signatureSession.service";
+import { createSignatureSession } from "../../services/signatureSession.service";
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+    role: "admin" | "user" | "signer";
+  };
+}
 
 export async function createSessionHandler(req: Request, res: Response) {
   try {
-    const { documentId, signers, ttlMinutes } = req.body;
+    const authReq = req as AuthenticatedRequest;
+    const { documentId, signers, ttlMinutes } = authReq.body;
 
     if (!documentId || !Array.isArray(signers) || signers.length === 0) {
       return res.status(400).json({ message: "Dados inválidos." });
     }
 
+    if (!authReq.user) {
+      return res.status(401).json({ message: "Não autorizado." });
+    }
+
     const session = await createSignatureSession({
       documentId,
       signers,
-      createdBy: req.user!.id, 
+      createdBy: authReq.user.id,
       ttlMinutes,
     });
 

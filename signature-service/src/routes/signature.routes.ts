@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createSessionHandler } from "../controllers/signature.controller";
+import { createSessionHandler } from "../models/controllers/signature.controller";
 import { authenticate } from "../middlewares/authenticate";
 
 const router = Router();

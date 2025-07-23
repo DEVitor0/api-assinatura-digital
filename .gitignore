@@ -19,7 +19,6 @@ __tests__/coverage/
 
 # Env
 .env
-.env.*
 
 # Editor/IDE
 .vscode/

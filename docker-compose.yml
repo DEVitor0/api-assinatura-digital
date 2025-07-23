@@ -5,10 +5,10 @@ services:
     build:
       context: ./auth-service
     container_name: auth-service
-    volumes:
-      - ./auth-service:/app
     depends_on:
       - mongo
+    ports:
+    - "5001:5001" 
     environment:
       - NODE_ENV=development
       - PORT=5001
@@ -18,14 +18,37 @@ services:
     build:
       context: ./document-service
     container_name: document-service
-    volumes:
-      - ./document-service:/app
     depends_on:
       - mongo
     environment:
       - NODE_ENV=development
       - PORT=5002
       - MONGO_URI=mongodb://mongo:27017/documents
+
+  signature-service:
+    build:
+      context: ./signature-service
+    container_name: signature-service
+    depends_on:
+      - mongo
+      - redis
+    ports:
+      - "5003:5003"
+    environment:
+      - NODE_ENV=development
+      - PORT=5003
+      - MONGO_URI=mongodb://mongo:27017/signature
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+    - "6380:6379"
+    volumes:
+    - redis_data:/data
+    restart: unless-stopped
 
   mongo:
     image: mongo:6
@@ -37,3 +60,4 @@ services:
 
 volumes:
   mongo_data:
+  redis_data:

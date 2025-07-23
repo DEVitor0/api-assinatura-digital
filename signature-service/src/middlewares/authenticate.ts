@@ -1,5 +1,16 @@
 import axios from "axios";
 import { Request, Response, NextFunction } from "express";
+import { Types } from "mongoose";
+
+interface AuthResponse {
+  valid: boolean;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    role: "admin" | "user" | "signer";
+  };
+}
 
 export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
@@ -11,13 +22,22 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
   const token = authHeader.split(" ")[1];
 
   try {
-    const { data } = await axios.post("http://auth-service:5001/api/auth/validate-token", { token });
+    const { data } = await axios.post<AuthResponse>(
+      "http://auth-service:5001/api/auth/validate-token", 
+      { token }
+    );
 
     if (!data.valid) {
       return res.status(401).json({ error: "Token inválido ou expirado." });
     }
 
-    req.user = data.user;
+    req.user = {
+      ...data.user,
+      id: Types.ObjectId.isValid(data.user.id) 
+        ? new Types.ObjectId(data.user.id).toString() 
+        : data.user.id
+    };
+    
     next();
   } catch (error) {
     const err = error as Error;
