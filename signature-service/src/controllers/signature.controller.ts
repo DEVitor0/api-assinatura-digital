@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { createSignatureSession } from "../../services/signatureSession.service";
+import { createSignatureSession } from "../services/signatureSession.service";
+import * as signatureService from "../services/signatureSession.service";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -9,6 +10,17 @@ interface AuthenticatedRequest extends Request {
     role: "admin" | "user" | "signer";
   };
 }
+
+
+export const adicionarSignatario = async (req: Request, res: Response) => {
+  try {
+    const { documentId, userId } = req.body;
+    const sessao = await signatureService.adicionarSignatario(documentId, userId);
+    res.status(201).json(sessao);
+  } catch (error: any) {
+    res.status(400).json({ erro: error.message });
+  }
+};
 
 export async function createSessionHandler(req: Request, res: Response) {
   try {

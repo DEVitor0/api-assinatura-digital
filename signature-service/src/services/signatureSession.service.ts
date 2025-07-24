@@ -1,6 +1,19 @@
 import SignatureSession from "../models/SignatureSession";
+import { verificarUsuarioExiste } from "./auth.service";
 import RedisClient from "../redis/client";
 import dayjs from "dayjs";
+
+export const adicionarSignatario = async (documentId: string, userId: string) => {
+  await verificarUsuarioExiste(userId);
+
+  const existe = await SignatureSession.findOne({ documentId, userId });
+  if (existe) {
+    throw new Error("Usuário já é signatário deste documento");
+  }
+
+  const novaSessao = await SignatureSession.create({ documentId, userId });
+  return novaSessao;
+};
 
 export async function createSignatureSession(data: {
   documentId: string;

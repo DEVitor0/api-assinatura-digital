@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const SignatureSessionSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
     documentId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
@@ -29,6 +34,7 @@ const SignatureSessionSchema = new mongoose.Schema(
     },
     expiresAt: {
       type: Date,
+      default: null,
       required: true,
     },
     status: {
