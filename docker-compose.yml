@@ -5,50 +5,38 @@ services:
     build:
       context: ./auth-service
     container_name: auth-service
-    depends_on:
-      - mongo
     ports:
-    - "5001:5001" 
+      - "5001:5001"
+    volumes:
+      - ./auth-service:/app
     environment:
       - NODE_ENV=development
       - PORT=5001
-      - MONGO_URI=mongodb://mongo:27017/auth
+      - MONGO_URI=mongodb://localhost:27017/auth
 
   document-service:
     build:
       context: ./document-service
     container_name: document-service
-    depends_on:
-      - mongo
+    ports:
+      - "5002:5002"
     environment:
       - NODE_ENV=development
       - PORT=5002
-      - MONGO_URI=mongodb://mongo:27017/documents
+      - MONGO_URI=mongodb://host.docker.internal:27017/documents
 
   signature-service:
     build:
       context: ./signature-service
     container_name: signature-service
-    depends_on:
-      - mongo
-      - redis
     ports:
       - "5003:5003"
     environment:
       - NODE_ENV=development
       - PORT=5003
-      - MONGO_URI=mongodb://mongo:27017/signature
+      - MONGO_URI=mongodb://host.docker.internal:27017/signature
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-
-  redis:
-    image: redis:7
-    container_name: redis
-    ports:
-    - "6380:6379"
-    volumes:
-    - redis_data:/data
-    restart: unless-stopped
 
   mongo:
     image: mongo:6
@@ -57,7 +45,17 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
 
 volumes:
-  mongo_data:
   redis_data:
+  mongo_data:
