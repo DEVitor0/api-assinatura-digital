@@ -6,6 +6,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
+    "resolveJsonModule": true,
     "outDir": "dist",
     "baseUrl": "./src",
     "types": ["node", "jest", "./src/types/express"],

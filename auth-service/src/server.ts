@@ -7,6 +7,9 @@ import authRoutes from "./pages/api/auth";
 import { globalRateLimiter } from "./middlewares/rateLimiter";
 import mongoose from "mongoose";
 
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from "../swagger.json"; 
+
 dotenv.config();
 
 const app = express();
@@ -16,9 +19,11 @@ app.use(helmet());
 app.use(express.json());
 app.use(morgan("dev"));
 
-app.use(globalRateLimiter); 
+app.use(globalRateLimiter);
 
 app.use("/api/auth", authRoutes);
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get("/api/health", (_, res) => res.json({ status: "ok" }));
 
@@ -37,7 +42,8 @@ if (require.main === module) {
   const PORT = process.env.PORT || 5001;
   connectToDatabase().then(() => {
     app.listen(PORT, () => {
-      console.log(`🚀 Auth service rodando na porta ${PORT}`);
+      console.log(`Auth service rodando na porta ${PORT}`);
+      console.log(`Documentação disponível em http://localhost:${PORT}/api-docs`);
     });
   });
 }
