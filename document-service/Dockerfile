@@ -1,19 +1,14 @@
-FROM node:20-alpine AS builder
+FROM node:20-alpine
 
 WORKDIR /app
 
 COPY package*.json ./
 RUN npm install
 
+RUN npm install --save-dev ts-node nodemon typescript
+
 COPY . .
-RUN npm run build
 
-FROM node:20-alpine
+EXPOSE 5002
 
-WORKDIR /app
-
-COPY --from=builder /app/dist ./dist
-COPY package*.json ./
-RUN npm install --production
-
-CMD ["node", "dist/src/server.js"]
+CMD ["npm", "run", "dev"]

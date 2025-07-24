@@ -1,20 +1,35 @@
 import express from "express";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 import documentsRouter from "./pages/api/documents/index";
 import uploadDocumentsRouter from "./pages/api/documents/upload";
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 5002;
 
 app.use(express.json());
-
 app.use("/api/documents", documentsRouter);
 app.use("/api/documents/upload", uploadDocumentsRouter);
 
-app.listen(PORT, () => {
-  console.log(`Document-service rodando na porta ${PORT}`);
-});
+const connectToDatabase = async () => {
+  try {
+    const mongoUri = process.env.MONGO_URI || "mongodb://localhost:27017/documents";
+    await mongoose.connect(mongoUri);
+    console.log("✅ Document-service conectado ao MongoDB com sucesso");
+  } catch (error) {
+    console.error("❌ Erro ao conectar ao MongoDB:", error);
+    process.exit(1);
+  }
+};
+
+if (require.main === module) {
+  connectToDatabase().then(() => {
+    app.listen(PORT, () => {
+      console.log(`Document-service rodando na porta ${PORT}`);
+    });
+  });
+}
 
 export default app;

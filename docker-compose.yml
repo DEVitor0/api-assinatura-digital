@@ -20,10 +20,13 @@ services:
     container_name: document-service
     ports:
       - "5002:5002"
+    volumes:
+      - ./document-service:/app
     environment:
       - NODE_ENV=development
       - PORT=5002
       - MONGO_URI=mongodb://host.docker.internal:27017/documents
+
 
   signature-service:
     build:

@@ -1,7 +1,12 @@
 import axios from "axios";
 import { Request, Response, NextFunction } from "express";
+import { JwtUserPayload } from "../types/jwt-payload";
 
-export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
+interface AuthenticatedRequest extends Request {
+  user?: JwtUserPayload;
+}
+
+export const authenticate = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader?.startsWith("Bearer ")) {
@@ -17,7 +22,8 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
       return res.status(401).json({ error: "Token inválido ou expirado." });
     }
 
-    req.user = data.user;
+    req.user = data.user as JwtUserPayload; 
+    
     next();
   } catch (error) {
     const err = error as Error;
@@ -25,3 +31,5 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     return res.status(500).json({ error: "Erro ao validar token." });
   }
 };
+
+export type { AuthenticatedRequest };

@@ -2,14 +2,20 @@ import express, { Request, Response } from "express";
 import { authenticate } from "../../../middlewares/authenticate";
 import mongoose from "mongoose";
 import { Document } from "../../../models/Document";
+import { JwtUserPayload } from "../../../types/jwt-payload";
+
+interface AuthenticatedRequest extends Request {
+  user?: JwtUserPayload;
+}
 
 const router = express.Router();
 
-router.get("/me", authenticate, (req: Request, res: Response) => {
-  res.json({ message: `Olá ${req.user?.name}, você está autenticado!` });
+router.get("/me", authenticate, (req: AuthenticatedRequest, res: Response) => {
+  const userName = req.user?.name || "Usuário";
+  res.json({ message: `Olá ${userName}, você está autenticado!` });
 });
 
-router.get("/", authenticate, async (req: Request, res: Response) => {
+router.get("/", authenticate, async (req: AuthenticatedRequest, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({ error: "Usuário não autenticado." });
@@ -21,7 +27,7 @@ router.get("/", authenticate, async (req: Request, res: Response) => {
   }
 });
 
-router.get("/:id", authenticate, async (req: Request, res: Response) => {
+router.get("/:id", authenticate, async (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -44,7 +50,7 @@ router.get("/:id", authenticate, async (req: Request, res: Response) => {
   }
 });
 
-router.delete("/:id", authenticate, async (req: Request, res: Response) => {
+router.delete("/:id", authenticate, async (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {

@@ -1,14 +1,14 @@
-import { Router, Request, Response } from "express";
+import { Router, Response } from "express";
 import { authenticate } from "../../../middlewares/authenticate";
+import { AuthenticatedRequest } from "../../../middlewares/authenticate"; // Importe o tipo estendido
 import { uploadPdf } from "../../../middlewares/uploadPdf";
 import { generateSHA256 } from "../../../libs/hash";
 import { saveDocumentMetadata } from "../../../services/document.service";
-
 import { Types } from "mongoose";
 
 const router = Router();
 
-router.post("/", authenticate, (req: Request, res: Response) => {
+router.post("/", authenticate, (req: AuthenticatedRequest, res: Response) => {
   uploadPdf(req, res, async (err) => {
     if (err) {
       return res.status(400).json({ error: err.message });
@@ -19,6 +19,10 @@ router.post("/", authenticate, (req: Request, res: Response) => {
     }
 
     try {
+      if (!req.user) {
+        return res.status(401).json({ error: "Usuário não autenticado." });
+      }
+
       const hash = await generateSHA256(req.file.path);
 
       const savedDoc = await saveDocumentMetadata({
@@ -26,7 +30,7 @@ router.post("/", authenticate, (req: Request, res: Response) => {
         storedName: req.file.filename,
         mimeType: req.file.mimetype,
         hash,
-        uploadedBy: new Types.ObjectId(req.user!.id),
+        uploadedBy: new Types.ObjectId(req.user.id), 
       });
 
       return res.status(200).json({
