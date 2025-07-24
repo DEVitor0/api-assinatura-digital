@@ -4,6 +4,9 @@ import mongoose from "mongoose";
 import documentsRouter from "./pages/api/documents/index";
 import uploadDocumentsRouter from "./pages/api/documents/upload";
 
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from "../swagger.json";
+
 dotenv.config();
 
 const app = express();
@@ -12,6 +15,7 @@ const PORT = process.env.PORT || 5002;
 app.use(express.json());
 app.use("/api/documents", documentsRouter);
 app.use("/api/documents/upload", uploadDocumentsRouter);
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const connectToDatabase = async () => {
   try {
