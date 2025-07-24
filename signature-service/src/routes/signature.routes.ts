@@ -1,11 +1,17 @@
 import { Router } from "express";
-import { createSessionHandler } from "../controllers/signature.controller";
-import { adicionarSignatario } from "../controllers/signature.controller";
+import {
+  createSessionHandler,
+  addSignerHandler,
+  listSignersHandler,
+  removeSignerHandler,
+} from "../controllers/signature.controller";
 import { authenticate } from "../middlewares/authenticate";
 
 const router = Router();
 
 router.post("/sessions", authenticate, createSessionHandler);
-router.post("/signatures", authenticate, adicionarSignatario);
+router.post("/signers", authenticate, addSignerHandler);
+router.get("/signers", authenticate, listSignersHandler);
+router.delete("/signers", authenticate, removeSignerHandler);
 
 export default router;

@@ -4,7 +4,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import swaggerUi from "swagger-ui-express";
-import swaggerDocument from "./swagger/swagger.json";
+import swaggerDocument from "../swagger.json";
 import router from "./routes/signature.routes";
 
 dotenv.config();

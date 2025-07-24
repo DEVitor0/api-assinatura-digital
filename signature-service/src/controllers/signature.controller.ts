@@ -1,50 +1,50 @@
 import { Request, Response } from "express";
-import { createSignatureSession } from "../services/signatureSession.service";
 import * as signatureService from "../services/signatureSession.service";
+import { sessionSchema, signerSchema } from "../utils/signature.schema";
 
-interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    name: string;
-    role: "admin" | "user" | "signer";
-  };
-}
-
-
-export const adicionarSignatario = async (req: Request, res: Response) => {
+export const createSessionHandler = async (req: Request, res: Response) => {
   try {
-    const { documentId, userId } = req.body;
-    const sessao = await signatureService.adicionarSignatario(documentId, userId);
-    res.status(201).json(sessao);
+    const validated = sessionSchema.parse(req.body);
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+    const session = await signatureService.createSignatureSession({
+      ...validated,
+      createdBy: req.user.id.toString(),
+    });
+    return res.status(201).json(session);
   } catch (error: any) {
-    res.status(400).json({ erro: error.message });
+    return res.status(400).json({ error: error.message });
   }
 };
 
-export async function createSessionHandler(req: Request, res: Response) {
+export const addSignerHandler = async (req: Request, res: Response) => {
   try {
-    const authReq = req as AuthenticatedRequest;
-    const { documentId, signers, ttlMinutes } = authReq.body;
-
-    if (!documentId || !Array.isArray(signers) || signers.length === 0) {
-      return res.status(400).json({ message: "Dados inválidos." });
-    }
-
-    if (!authReq.user) {
-      return res.status(401).json({ message: "Não autorizado." });
-    }
-
-    const session = await createSignatureSession({
-      documentId,
-      signers,
-      createdBy: authReq.user.id,
-      ttlMinutes,
-    });
-
-    return res.status(201).json(session);
-  } catch (err: any) {
-    console.error(err);
-    return res.status(500).json({ message: "Erro ao criar sessão." });
+    const validated = signerSchema.parse(req.body);
+    const result = await signatureService.addSigner(validated.documentId, validated.userId);
+    return res.status(201).json(result);
+  } catch (error: any) {
+    return res.status(400).json({ error: error.message });
   }
-}
+};
+
+export const listSignersHandler = async (req: Request, res: Response) => {
+  try {
+    const { documentId } = req.query;
+    if (!documentId || typeof documentId !== "string") {
+      return res.status(400).json({ error: "Invalid documentId" });
+    }
+    const result = await signatureService.listSigners(documentId);
+    return res.status(200).json(result);
+  } catch (error: any) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+export const removeSignerHandler = async (req: Request, res: Response) => {
+  try {
+    const validated = signerSchema.parse(req.body);
+    const result = await signatureService.removeSigner(validated.documentId, validated.userId);
+    return res.status(200).json(result);
+  } catch (error: any) {
+    return res.status(400).json({ error: error.message });
+  }
+};

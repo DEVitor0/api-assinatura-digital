@@ -1,0 +1,138 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Signature Service API",
+    "version": "1.0.0",
+    "description": "API for managing document signature sessions and signers"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5003/api",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/sessions": {
+      "post": {
+        "summary": "Create a signature session",
+        "tags": ["Sessions"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSessionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Session created successfully" },
+          "400": { "description": "Invalid input" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/signers": {
+      "post": {
+        "summary": "Add signer to a document",
+        "tags": ["Signers"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddSignerInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Signer added successfully" },
+          "400": { "description": "Invalid input or signer already exists" },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "get": {
+        "summary": "List all signers",
+        "tags": ["Signers"],
+        "responses": {
+          "200": {
+            "description": "List of signers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Signer" }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "delete": {
+        "summary": "Remove a signer from a document",
+        "tags": ["Signers"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveSignerInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Signer removed successfully" },
+          "400": { "description": "Invalid input or signer not found" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateSessionInput": {
+        "type": "object",
+        "properties": {
+          "documentId": { "type": "string" },
+          "signers": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "ttlMinutes": { "type": "integer" }
+        },
+        "required": ["documentId", "signers"]
+      },
+      "AddSignerInput": {
+        "type": "object",
+        "properties": {
+          "documentId": { "type": "string" },
+          "userId": { "type": "string" }
+        },
+        "required": ["documentId", "userId"]
+      },
+      "RemoveSignerInput": {
+        "type": "object",
+        "properties": {
+          "documentId": { "type": "string" },
+          "userId": { "type": "string" }
+        },
+        "required": ["documentId", "userId"]
+      },
+      "Signer": {
+        "type": "object",
+        "properties": {
+          "userId": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "signed", "rejected"]
+          },
+          "signedAt": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      }
+    }
+  }
+}

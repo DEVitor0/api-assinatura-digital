@@ -1,19 +1,7 @@
 import SignatureSession from "../models/SignatureSession";
-import { verificarUsuarioExiste } from "./auth.service";
 import RedisClient from "../redis/client";
 import dayjs from "dayjs";
-
-export const adicionarSignatario = async (documentId: string, userId: string) => {
-  await verificarUsuarioExiste(userId);
-
-  const existe = await SignatureSession.findOne({ documentId, userId });
-  if (existe) {
-    throw new Error("Usuário já é signatário deste documento");
-  }
-
-  const novaSessao = await SignatureSession.create({ documentId, userId });
-  return novaSessao;
-};
+import { verifyUserExists } from './auth.service';
 
 export async function createSignatureSession(data: {
   documentId: string;
@@ -22,18 +10,35 @@ export async function createSignatureSession(data: {
   ttlMinutes?: number;
 }) {
   const { documentId, signers, createdBy, ttlMinutes = 30 } = data;
-
   const session = await SignatureSession.create({
     documentId,
     createdBy,
-    signers: signers.map((id) => ({
-      userId: id,
-    })),
+    signers: signers.map((id) => ({ userId: id })),
     expiresAt: dayjs().add(ttlMinutes, "minute").toDate(),
   });
-
-  const redisKey = `session:${session._id}`;
-  await RedisClient.set(redisKey, "active", "EX", ttlMinutes * 60);
-
+  await RedisClient.set(`session:${session._id}`, "active", "EX", ttlMinutes * 60);
   return session;
+}
+
+export async function addSigner(documentId: string, userId: string) {
+  await verifyUserExists(userId);
+  const exists = await SignatureSession.findOne({ documentId, "signers.userId": userId });
+  if (exists) throw new Error("User already a signer for this document");
+  return SignatureSession.updateOne(
+    { documentId },
+    { $push: { signers: { userId, status: "pending" } } }
+  );
+}
+
+export async function listSigners(documentId: string) {
+  const session = await SignatureSession.findOne({ documentId });
+  if (!session) throw new Error("Session not found");
+  return session.signers;
+}
+
+export async function removeSigner(documentId: string, userId: string) {
+  return SignatureSession.updateOne(
+    { documentId },
+    { $pull: { signers: { userId } } }
+  );
 }
