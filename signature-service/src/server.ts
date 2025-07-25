@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from "../swagger.json";
 import router from "./routes/signature.routes";
+import { connectRabbitMQ } from './services/rabbit/rabbit';
 
 dotenv.config();
 
@@ -21,6 +22,13 @@ app.use("/api", router);
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get("/", (_, res) => res.send("Signature Service is running"));
+
+connectRabbitMQ()
+  .then((): void => console.log("✔️ RabbitMQ conectado"))
+  .catch((err: Error): void => {
+    console.error("Erro ao conectar RabbitMQ:", err);
+    process.exit(1);
+  });
 
 app.listen(PORT, () => {
   console.log(`📝 Signature-service rodando na porta ${PORT}`);

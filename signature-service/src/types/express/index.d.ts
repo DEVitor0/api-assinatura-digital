@@ -8,5 +8,9 @@ declare module "express-serve-static-core" {
       name: string;
       role: "admin" | "user" | "signer";
     };
+    clientInfo?: {
+      ipAddress: string;
+      userAgent: string;
+    };
   }
 }
