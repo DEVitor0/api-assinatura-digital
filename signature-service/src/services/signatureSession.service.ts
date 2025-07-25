@@ -42,3 +42,7 @@ export async function removeSigner(documentId: string, userId: string) {
     { $pull: { signers: { userId } } }
   );
 }
+
+export const findSessionByDocumentId = async (documentId: string) => {
+  return await SignatureSession.findOne({ documentId });
+};

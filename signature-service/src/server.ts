@@ -17,11 +17,12 @@ app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
 
-app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api", router);
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get("/", (_, res) => res.send("Signature Service is running"));
 
 app.listen(PORT, () => {
-  console.log(`Signature Service listening on port ${PORT}`);
+  console.log(`📝 Signature-service rodando na porta ${PORT}`);
+  console.log(`📚 Documentação Swagger disponível em http://localhost:${PORT}/api/docs`);
 });

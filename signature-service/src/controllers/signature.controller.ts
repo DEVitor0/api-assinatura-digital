@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as signatureService from "../services/signatureSession.service";
 import { sessionSchema, signerSchema } from "../utils/signature.schema";
+import { generateSignatureToken } from "../utils/jwt";
 
 export const createSessionHandler = async (req: Request, res: Response) => {
   try {
@@ -44,6 +45,36 @@ export const removeSignerHandler = async (req: Request, res: Response) => {
     const validated = signerSchema.parse(req.body);
     const result = await signatureService.removeSigner(validated.documentId, validated.userId);
     return res.status(200).json(result);
+  } catch (error: any) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+export const generateTokenForSignerHandler = async (req: Request, res: Response) => {
+  try {
+    const { documentId, userId } = signerSchema.parse(req.body);
+
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+
+    const session = await signatureService.findSessionByDocumentId(documentId);
+    if (!session) return res.status(404).json({ message: "Sessão não encontrada" });
+
+    const isOwner = session.createdBy.toString() === req.user.id.toString();
+    if (!isOwner) return res.status(403).json({ message: "Você não é o criador da sessão" });
+
+    const signerExists = session.signers.some(signer =>
+      signer.userId.toString() === userId.toString()
+    );
+    if (!signerExists) return res.status(404).json({ message: "Signatário não está na sessão" });
+
+    const token = generateSignatureToken({
+      userId,
+      documentId,
+      sessionId: session._id.toString(),
+      type: "signature",
+    });
+
+    return res.status(201).json({ token });
   } catch (error: any) {
     return res.status(400).json({ error: error.message });
   }

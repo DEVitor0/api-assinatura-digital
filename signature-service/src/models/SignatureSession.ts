@@ -7,6 +7,7 @@ const SignatureSessionSchema = new mongoose.Schema({
   signers: [
     {
       userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "User" },
+      signed: { type: Boolean, default: false },
       status: { type: String, enum: ["pending", "signed", "rejected"], default: "pending" },
       signedAt: Date,
     },
