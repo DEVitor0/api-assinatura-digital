@@ -2,6 +2,11 @@ import SignatureSession from "../models/SignatureSession";
 import RedisClient from "./redis/client";
 import dayjs from "dayjs";
 import { verifyUserExists } from './auth.service';
+import {
+  signatureSessionsCreated,
+  signatureSessionDuration,
+  updateActiveSessionsGauge,
+} from "../metrics/metrics";
 
 export async function createSignatureSession(data: {
   documentId: string;
@@ -9,14 +14,24 @@ export async function createSignatureSession(data: {
   createdBy: string;
   ttlMinutes?: number;
 }) {
+  const end = signatureSessionDuration.startTimer(); 
+
   const { documentId, signers, createdBy, ttlMinutes = 30 } = data;
+
   const session = await SignatureSession.create({
     documentId,
     createdBy,
     signers: signers.map((id) => ({ userId: id })),
     expiresAt: dayjs().add(ttlMinutes, "minute").toDate(),
   });
+
   await RedisClient.set(`session:${session._id}`, "active", "EX", ttlMinutes * 60);
+
+  signatureSessionsCreated.inc(); 
+  end();
+
+  updateActiveSessionsGauge(); 
+
   return session;
 }
 
@@ -41,6 +56,20 @@ export async function removeSigner(documentId: string, userId: string) {
     { documentId },
     { $pull: { signers: { userId } } }
   );
+}
+
+export async function isSessionActive(sessionId: string): Promise<boolean> {
+  const result = await RedisClient.get(`session:${sessionId}`);
+  return result === "active";
+}
+
+export async function expireSession(sessionId: string) {
+  await RedisClient.del(`session:${sessionId}`);
+}
+
+export async function getSessionTTL(sessionId: string): Promise<number | null> {
+  const ttl = await RedisClient.ttl(`session:${sessionId}`);
+  return ttl >= 0 ? ttl : null;
 }
 
 export const findSessionByDocumentId = async (documentId: string) => {
