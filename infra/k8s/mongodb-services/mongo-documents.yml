@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-documents
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo-documents
+  template:
+    metadata:
+      labels:
+        app: mongo-documents
+    spec:
+      containers:
+        - name: mongo-documents
+          image: mongo:6
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - mountPath: /data/db
+              name: mongo-documents-storage
+      volumes:
+        - name: mongo-documents-storage
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-documents
+spec:
+  selector:
+    app: mongo-documents
+  ports:
+    - port: 27017
+      targetPort: 27017

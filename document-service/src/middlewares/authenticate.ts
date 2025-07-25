@@ -16,7 +16,7 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
   const token = authHeader.split(" ")[1];
 
   try {
-    const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || "http://localhost:5001";
+    const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || "http://auth-service:5001";
     const { data } = await axios.post(`${AUTH_SERVICE_URL}/api/auth/validate-token`, { token });
 
     if (!data.valid) {

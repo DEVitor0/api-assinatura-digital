@@ -1,5 +1,5 @@
 import SignatureSession from "../models/SignatureSession";
-import RedisClient from "../redis/client";
+import RedisClient from "./redis/client";
 import dayjs from "dayjs";
 import { verifyUserExists } from './auth.service';
 

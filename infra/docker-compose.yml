@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   auth-service:
     build:
@@ -12,7 +10,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=5001
-      - MONGO_URI=mongodb://localhost:27017/auth
+      - MONGO_URI=mongodb://mongo:27017/auth
 
   document-service:
     build:
@@ -26,6 +24,9 @@ services:
       - NODE_ENV=development
       - PORT=5002
       - MONGO_URI=mongodb://host.docker.internal:27017/documents
+      - AUTH_SERVICE_URL=http://auth-service:5001
+    depends_on:
+      - auth-service
 
 
   signature-service:
@@ -40,6 +41,8 @@ services:
       - MONGO_URI=mongodb://host.docker.internal:27017/signature
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+    depends_on:
+      - rabbitmq_data
 
   mongo:
     image: mongo:6
@@ -59,6 +62,16 @@ services:
       - redis_data:/data
     restart: unless-stopped
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"    
+      - "15672:15672"   
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
 volumes:
   redis_data:
   mongo_data:
+  rabbitmq_data:
+

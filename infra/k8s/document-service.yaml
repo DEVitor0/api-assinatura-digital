@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: document-service
+  value: http://document-service:5002
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: document-service
+  template:
+    metadata:
+      labels:
+        app: document-service
+    spec:
+      containers:
+        - name: document-service
+          image: document-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5002
+          env:
+            - name: NODE_ENV
+              value: "development"
+            - name: PORT
+              value: "5002"
+            - name: MONGO_URI
+              value: "mongodb://mongo-service:27017/documents"
+            - name: AUTH_SERVICE_URL
+              value: "http://auth-service:5001"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: document-service
+spec:
+  selector:
+    app: document-service
+  ports:
+    - port: 5002
+      targetPort: 5002

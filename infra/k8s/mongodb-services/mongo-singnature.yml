@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-signature
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo-signature
+  template:
+    metadata:
+      labels:
+        app: mongo-signature
+    spec:
+      containers:
+        - name: mongo-signature
+          image: mongo:6
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - mountPath: /data/db
+              name: mongo-signature-storage
+      volumes:
+        - name: mongo-signature-storage
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-signature
+spec:
+  selector:
+    app: mongo-signature
+  ports:
+    - port: 27017
+      targetPort: 27017

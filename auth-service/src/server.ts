@@ -1,11 +1,13 @@
 import express from "express";
+import mongoose from "mongoose";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
+
 import authRoutes from "./pages/api/auth";
 import { globalRateLimiter } from "./middlewares/rateLimiter";
-import mongoose from "mongoose";
+
 
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from "../swagger.json"; 
@@ -29,7 +31,7 @@ app.get("/api/health", (_, res) => res.json({ status: "ok" }));
 
 export const connectToDatabase = async () => {
   try {
-    const mongoUri = process.env.MONGO_URI || "mongodb://localhost:27017/auth";
+    const mongoUri = process.env.MONGO_URI || "mongodb://mongo:27017/auth";
     await mongoose.connect(mongoUri);
     console.log("Conectado ao MongoDB com sucesso");
   } catch (error) {

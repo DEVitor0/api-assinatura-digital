@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5002/api",
+      "url": "http://document-service:5002/api",
       "description": "Development server"
     }
   ],

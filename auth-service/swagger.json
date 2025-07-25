@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5001/api/auth",
+      "url": "http://auth-service:5001/api/auth",
       "description": "Servidor local de desenvolvimento"
     }
   ],
