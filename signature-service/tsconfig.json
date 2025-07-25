@@ -15,5 +15,6 @@
     }
   },
   "include": ["src/**/*"],
+  "setupFiles": ["dotenv/config"],
   "exclude": ["node_modules", "dist", "tests"]
 }
