@@ -4,6 +4,7 @@ import {
   addSignerHandler,
   listSignersHandler,
   removeSignerHandler,
+  getSessionWithDocumentHandler
 } from "../controllers/signature.controller";
 import { authenticate } from "../middlewares/authenticate";
 import { generateTokenForSignerHandler } from "../controllers/signature.controller";
@@ -19,6 +20,7 @@ router.get("/signers", authenticate, listSignersHandler);
 router.delete("/signers", authenticate, removeSignerHandler);
 router.post("/signers/token", authenticate, generateTokenForSignerHandler);
 router.post("/sign", authenticate, captureClientInfo, signDocumentHandler);
+router.get("/sessions/:documentId", authenticate, getSessionWithDocumentHandler);
 
 router.get("/metrics", async (req, res) => {
   res.set("Content-Type", register.contentType);

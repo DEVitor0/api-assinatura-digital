@@ -3,20 +3,32 @@ import * as signatureService from "../services/signatureSession.service";
 import * as signatureLogService from "../services/signatureLog.service";
 import { sessionSchema, signerSchema } from "../utils/signature.schema";
 import { generateSignatureToken } from "../utils/jwt";
+import { getDocumentById } from "../services/document.service";
 
 export const createSessionHandler = async (req: Request, res: Response) => {
   try {
     const validated = sessionSchema.parse(req.body);
     if (!req.user) return res.status(401).json({ message: "Unauthorized" });
-    const session = await signatureService.createSignatureSession({
-      ...validated,
-      createdBy: req.user.id.toString(),
-    });
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ message: "Token not provided" });
+
+    const token = authHeader.split(" ")[1];
+
+    const session = await signatureService.createSignatureSession(
+      {
+        ...validated,
+        createdBy: req.user.id.toString(),
+      },
+      token
+    );
+
     return res.status(201).json(session);
   } catch (error: any) {
     return res.status(400).json({ error: error.message });
   }
 };
+
 
 export const addSignerHandler = async (req: Request, res: Response) => {
   try {
@@ -110,6 +122,26 @@ export const signDocumentHandler = async (req: Request, res: Response) => {
     });
 
     return res.status(200).json({ message: "Assinatura registrada com sucesso" });
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+export const getSessionWithDocumentHandler = async (req: Request, res: Response) => {
+  try {
+    const { documentId } = req.params;
+    if (!documentId) return res.status(400).json({ error: "documentId is required" });
+
+    const session = await signatureService.findSessionByDocumentId(documentId);
+    if (!session) return res.status(404).json({ error: "Session not found" });
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: "Token required" });
+    const token = authHeader.split(" ")[1];
+
+    const document = await getDocumentById(documentId, token);
+
+    return res.status(200).json({ session, document });
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
   }

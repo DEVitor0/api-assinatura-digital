@@ -7,13 +7,17 @@ import {
   signatureSessionDuration,
   updateActiveSessionsGauge,
 } from "../metrics/metrics";
+import { getDocumentById } from "./document.service";
 
 export async function createSignatureSession(data: {
   documentId: string;
   signers: string[];
   createdBy: string;
   ttlMinutes?: number;
-}) {
+}, userToken: string) {
+
+  await getDocumentById(data.documentId, userToken);
+  
   const end = signatureSessionDuration.startTimer(); 
 
   const { documentId, signers, createdBy, ttlMinutes = 30 } = data;
