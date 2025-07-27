@@ -1,4 +1,6 @@
 import express from 'express';
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from '../swagger.json';
 import metadataRoutes from './routes/metadata.routes';
 import publicRoutes from "./routes/public.routes";
 
@@ -14,5 +16,6 @@ app.get('/healthcheck', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 export default app;

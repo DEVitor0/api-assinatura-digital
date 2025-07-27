@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { generateMetadataFromContent, generateMetadataFromFile, saveCertificateMetadata } from '../services/metadata.service';
-import { authenticate } from 'middleware/authenticate';
+import { authenticate } from '../middleware/authenticate';
 
 const router = Router();
 

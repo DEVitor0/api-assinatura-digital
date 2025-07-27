@@ -1,0 +1,217 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Certificate Service API",
+    "version": "1.0.0",
+    "description": "API para geração e consulta de certificados com metadados e QR Code de verificação."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5005/api",
+      "description": "Servidor local"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Certificados",
+      "description": "Operações relacionadas a geração e consulta de certificados"
+    }
+  ],
+  "paths": {
+    "/generate-metadata": {
+      "post": {
+        "tags": ["Certificados"],
+        "summary": "Gera metadados a partir de um conteúdo textual",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "content": {
+                    "type": "string",
+                    "example": "Conteúdo do certificado em texto"
+                  }
+                },
+                "required": ["content"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Metadados gerados com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Requisição inválida (falta conteúdo)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno ao gerar metadados",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/certificates": {
+      "post": {
+        "tags": ["Certificados"],
+        "summary": "Salva os metadados do certificado a partir de um arquivo PDF já existente",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "signers", "filePath"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Certificado de Conclusão"
+                  },
+                  "signers": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "example": ["João Silva", "Maria Souza"]
+                  },
+                  "filePath": {
+                    "type": "string",
+                    "example": "/uploads/certificate-123.pdf"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Certificado salvo com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "metadata": { "$ref": "#/components/schemas/Certificate" },
+                    "downloadUrl": { "type": "string", "format": "uri" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Campos obrigatórios ausentes",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao salvar metadados do certificado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/certificates/{identifier}": {
+      "get": {
+        "tags": ["Certificados"],
+        "summary": "Consulta pública de certificado por UUID ou hash",
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "abc123def456"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Certificado encontrado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Certificate" }
+              }
+            }
+          },
+          "404": {
+            "description": "Certificado não encontrado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "MetadataResult": {
+        "type": "object",
+        "properties": {
+          "hash": { "type": "string", "example": "c63f6a..." },
+          "protocol": { "type": "string", "example": "e4e8b5d3-..." },
+          "qrCodeDataUrl": { "type": "string", "format": "uri", "example": "data:image/png;base64,..." },
+          "downloadUrl": { "type": "string", "format": "uri", "example": "http://localhost:5005/certificates/uuid.pdf" },
+          "verificationUrl": { "type": "string", "format": "uri", "example": "http://localhost:5005/verify/uuid" }
+        }
+      },
+      "Certificate": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "example": "Certificado de Participação" },
+          "hash": { "type": "string", "example": "a1b2c3..." },
+          "signers": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "url": { "type": "string", "format": "uri" },
+          "documentId": { "type": "string", "example": "document-123" },
+          "uuid": { "type": "string", "example": "uuid-v4" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Mensagem de erro"
+          }
+        }
+      }
+    }
+  }
+}
