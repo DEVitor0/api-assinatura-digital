@@ -51,13 +51,8 @@ services:
       - "5005:5005"
     environment:
       - MONGO_URI=mongodb://mongo:27017/certificates
-      - MINIO_ENDPOINT=minio
-      - MINIO_PORT=9000
-      - MINIO_ACCESS_KEY=admin
-      - MINIO_SECRET_KEY=admin123
     depends_on:
       - mongo
-      - minio
 
   mongo:
     image: mongo:6
@@ -84,19 +79,6 @@ services:
       - "15672:15672"   
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-
-  minio:
-    image: minio/minio
-    container_name: minio
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    environment:
-      MINIO_ROOT_USER: admin
-      MINIO_ROOT_PASSWORD: admin123
-    command: server /data --console-address ":9001"
-    volumes:
-      - minio-data:/data
 
 volumes:
   redis_data:
