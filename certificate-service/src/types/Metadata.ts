@@ -9,3 +9,12 @@ export interface GenerateMetadataInput {
   conteudo: string;
   signatarios: Signatario[];
 }
+
+export interface CertificateMetadata {
+  name: string;
+  hash: string;
+  filePath: string;
+  signers: string[];
+  url: string;
+  generatedAt: Date;
+}
