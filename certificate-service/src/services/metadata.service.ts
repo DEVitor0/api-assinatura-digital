@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import { createHash } from "crypto";
 import fs from "fs/promises";
 import path from "path";
 import { Certificate } from "../models/Certificate";
@@ -13,7 +14,28 @@ export interface MetadataResult {
   verificationUrl: string;
 }
 
-export async function generateMetadata(
+export async function generateMetadataFromContent(
+  content: string,
+  baseVerificationUrl: string
+): Promise<MetadataResult> {
+  const hash = createHash("sha256").update(content).digest("hex");
+  const protocol = uuidv4();
+
+  const verificationUrl = `${baseVerificationUrl}/verify/${protocol}`;
+  const downloadUrl = `${baseVerificationUrl}/certificates/${protocol}.pdf`;
+
+  const qrCodeDataUrl = await generateQRCode(verificationUrl);
+
+  return {
+    hash,
+    protocol,
+    qrCodeDataUrl,
+    downloadUrl,
+    verificationUrl,
+  };
+}
+
+export async function generateMetadataFromFile(
   filePath: string,
   baseVerificationUrl: string
 ): Promise<MetadataResult> {
