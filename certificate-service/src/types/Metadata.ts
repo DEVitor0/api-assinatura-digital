@@ -1,7 +1,7 @@
 export interface Signatario {
   nome: string;
   email: string;
-  dataAssinatura: string; 
+  dataAssinatura: string;
 }
 
 export interface GenerateMetadataInput {

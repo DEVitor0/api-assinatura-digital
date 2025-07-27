@@ -5,7 +5,7 @@ export interface MetadataDocument extends Document {
   hash: string;
   signers: string[];
   url: string;
-  filePath: string;
+  documentId: string;
   uuid: string;
   createdAt: Date;
 }
@@ -16,7 +16,7 @@ const MetadataSchema: Schema<MetadataDocument> = new Schema(
     hash: { type: String, required: true, unique: true },
     signers: [{ type: String, required: true }],
     url: { type: String, required: true },
-    filePath: { type: String, required: true },
+    documentId: { type: String, required: true },
     uuid: { type: String, required: true, unique: true },
   },
   {

@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { generateMetadataFromContent, generateMetadataFromFile, saveCertificateMetadata } from '../services/metadata.service';
+import { authenticate } from 'middleware/authenticate';
 
 const router = Router();
 
-router.post('/generate-metadata', async (req, res) => {
+router.post('/generate-metadata', authenticate, async (req, res) => {
   const { content } = req.body;
 
   if (!content) {
@@ -20,7 +21,7 @@ router.post('/generate-metadata', async (req, res) => {
   }
 });
 
-router.post('/certificates', async (req, res) => {
+router.post('/certificates', authenticate, async (req, res) => {
   try {
     const { name, signers, filePath } = req.body;
 
@@ -35,7 +36,7 @@ router.post('/certificates', async (req, res) => {
     const saved = await saveCertificateMetadata({
       name,
       signers,
-      originalFilePath: filePath,
+      documentId: filePath,
       baseUrl,
       protocol,
       hash
