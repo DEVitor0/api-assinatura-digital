@@ -1,0 +1,96 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Validator Service API",
+    "version": "1.0.0",
+    "description": "API para validação de documentos e certificados"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5006/api/validator",
+      "description": "Servidor local"
+    }
+  ],
+  "paths": {
+    "/verify/{codigo}": {
+      "get": {
+        "summary": "Valida a integridade de um documento por código",
+        "tags": ["Validação"],
+        "parameters": [
+          {
+            "name": "codigo",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Código identificador do certificado"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": { "type": "string" },
+            "description": "Token JWT para autenticação (opcional)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Documento íntegro e válido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "valido": { "type": "boolean", "example": true },
+                    "mensagem": { "type": "string", "example": "Documento íntegro e válido." },
+                    "hashOriginal": { "type": "string", "example": "abc123" },
+                    "hashCalculado": { "type": "string", "example": "abc123" },
+                    "certificado": { "type": "object" },
+                    "documento": { "type": "object" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Documento inválido ou erro na validação",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "mensagem": { "type": "string", "example": "Documento corrompido ou alterado." },
+                    "hashOriginal": { "type": "string" },
+                    "hashCalculado": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/healthcheck": {
+      "get": {
+        "summary": "Verifica o estado de saúde do serviço",
+        "tags": ["Sistema"],
+        "responses": {
+          "200": {
+            "description": "Serviço está saudável",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "ok" },
+                    "service": { "type": "string", "example": "validator-service" },
+                    "uptime": { "type": "number", "example": 123.456 }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -21,6 +21,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^24.1.0",
     "@types/supertest": "^6.0.3",
+    "@types/swagger-ui-express": "^4.1.8",
     "@typescript-eslint/eslint-plugin": "^8.37.0",
     "@typescript-eslint/parser": "^8.37.0",
     "eslint": "^9.31.0",
@@ -34,6 +35,8 @@
   },
   "dependencies": {
     "axios": "^1.11.0",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   }
 }
