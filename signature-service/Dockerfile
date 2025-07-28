@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM node:20
 
 WORKDIR /app
 
@@ -6,14 +6,7 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
-RUN npm run build
 
-FROM node:20-alpine
+EXPOSE 5003
 
-WORKDIR /app
-
-COPY --from=builder /app/dist ./dist
-COPY package*.json ./
-RUN npm install --production
-
-CMD ["node", "dist/server.js"]
+CMD ["npm", "run", "start"]  # ou "dev", se estiver usando nodemon

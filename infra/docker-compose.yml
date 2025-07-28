@@ -28,7 +28,6 @@ services:
     depends_on:
       - auth-service
 
-
   signature-service:
     build:
       context: ./signature-service
@@ -45,7 +44,8 @@ services:
       - rabbitmq_data
 
   certificate-service:
-    build: .
+    build:
+      context: ./certificate-service
     container_name: certificate-service
     ports:
       - "5005:5005"
@@ -53,6 +53,23 @@ services:
       - MONGO_URI=mongodb://mongo:27017/certificates
     depends_on:
       - mongo
+
+  validator-service:
+    build:
+      context: ./validator-service
+    container_name: validator-service
+    ports:
+      - "5006:5006"
+    volumes:
+      - ./validator-service:/app
+    environment:
+      - NODE_ENV=development
+      - PORT=5006
+      - CERTIFICATE_SERVICE_URL=http://certificate-service:5005/api/public
+      - DOCUMENT_SERVICE_URL=http://document-service:5002/api/documents
+    depends_on:
+      - certificate-service
+      - document-service
 
   mongo:
     image: mongo:6
@@ -75,8 +92,8 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     ports:
-      - "5672:5672"    
-      - "15672:15672"   
+      - "5672:5672"
+      - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
@@ -85,4 +102,3 @@ volumes:
   mongo_data:
   rabbitmq_data:
   minio-data:
-
