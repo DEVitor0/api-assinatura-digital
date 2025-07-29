@@ -70,6 +70,23 @@ services:
     depends_on:
       - certificate-service
       - document-service
+      
+  audit-service:
+    build:
+      context: ./audit-service
+    container_name: audit-service
+    ports:
+      - "5007:5007"
+    volumes:
+      - ./audit-service:/app
+    environment:
+      - NODE_ENV=development
+      - PORT=5007
+      - MONGO_URI=mongodb://mongo:27017/audit
+      - RABBITMQ_URL=amqp://rabbitmq
+    depends_on:
+      - mongo
+      - rabbitmq
 
   mongo:
     image: mongo:6
