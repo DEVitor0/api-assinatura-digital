@@ -1,96 +1,127 @@
 {
-  "openapi": "3.0.0",
+  "openapi": "3.0.3",
   "info": {
     "title": "Validator Service API",
-    "version": "1.0.0",
-    "description": "API para validação de documentos e certificados"
+    "description": "Serviço responsável por validar a integridade de documentos vinculados a certificados digitais.",
+    "version": "1.0.0"
   },
-  "servers": [
-    {
-      "url": "http://localhost:5006/api/validator",
-      "description": "Servidor local"
-    }
-  ],
   "paths": {
-    "/verify/{codigo}": {
+    "/api/validator/verify/{codigo}": {
       "get": {
-        "summary": "Valida a integridade de um documento por código",
-        "tags": ["Validação"],
+        "summary": "Validar documento por código do certificado",
+        "description": "Valida se o documento vinculado ao certificado é íntegro, comparando o hash original com o hash atual do arquivo PDF.",
         "parameters": [
           {
             "name": "codigo",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" },
-            "description": "Código identificador do certificado"
+            "description": "Código público do certificado (UUID ou hash)",
+            "schema": {
+              "type": "string"
+            }
           },
           {
             "name": "Authorization",
             "in": "header",
             "required": false,
-            "schema": { "type": "string" },
-            "description": "Token JWT para autenticação (opcional)"
+            "description": "Token JWT de autenticação (opcional)",
+            "schema": {
+              "type": "string",
+              "example": "Bearer <jwt_token>"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Documento íntegro e válido",
+            "description": "Documento válido e íntegro.",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "valido": { "type": "boolean", "example": true },
-                    "mensagem": { "type": "string", "example": "Documento íntegro e válido." },
-                    "hashOriginal": { "type": "string", "example": "abc123" },
-                    "hashCalculado": { "type": "string", "example": "abc123" },
-                    "certificado": { "type": "object" },
-                    "documento": { "type": "object" }
+                "example": {
+                  "valido": true,
+                  "mensagem": "Documento íntegro e válido.",
+                  "hashOriginal": "abcd1234...",
+                  "hashCalculado": "abcd1234...",
+                  "certificado": {
+                    "id": "cert123",
+                    "documentId": "doc456",
+                    "hash": "abcd1234..."
+                  },
+                  "documento": {
+                    "_id": "doc456",
+                    "storedName": "certificado-abc.pdf",
+                    "path": "http://document-service:5002/files/abc.pdf",
+                    "hash": "abcd1234..."
                   }
                 }
               }
             }
           },
           "400": {
-            "description": "Documento inválido ou erro na validação",
+            "description": "Documento inválido ou erro de validação.",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "mensagem": { "type": "string", "example": "Documento corrompido ou alterado." },
-                    "hashOriginal": { "type": "string" },
-                    "hashCalculado": { "type": "string" }
+                "examples": {
+                  "Certificado não encontrado": {
+                    "value": {
+                      "mensagem": "Certificado não encontrado.",
+                      "valido": false
+                    }
+                  },
+                  "Documento corrompido": {
+                    "value": {
+                      "mensagem": "Documento corrompido ou alterado.",
+                      "valido": false,
+                      "hashOriginal": "abcd1234...",
+                      "hashCalculado": "efgh5678..."
+                    }
                   }
                 }
               }
             }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "example": {
+                  "mensagem": "Erro na validação: erro de conexão com o serviço de certificados"
+                }
+              }
+            }
           }
-        }
+        },
+        "tags": ["Validação"]
       }
     },
-    "/healthcheck": {
+    "/api/validator/healthcheck": {
       "get": {
-        "summary": "Verifica o estado de saúde do serviço",
-        "tags": ["Sistema"],
+        "summary": "Verifica se o serviço está online",
         "responses": {
           "200": {
-            "description": "Serviço está saudável",
+            "description": "Status OK",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": { "type": "string", "example": "ok" },
-                    "service": { "type": "string", "example": "validator-service" },
-                    "uptime": { "type": "number", "example": 123.456 }
-                  }
+                "example": {
+                  "status": "ok",
+                  "service": "validator-service",
+                  "uptime": 103.24
                 }
               }
             }
           }
-        }
+        },
+        "tags": ["Status"]
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "Validação",
+      "description": "Operações de validação de documentos por código de certificado"
+    },
+    {
+      "name": "Status",
+      "description": "Operações de monitoramento do serviço"
+    }
+  ]
 }
