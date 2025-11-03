@@ -25,7 +25,7 @@ app.use(globalRateLimiter);
 
 app.use("/api/auth", authRoutes);
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get("/api/health", (_, res) => res.json({ status: "ok" }));
 
